@@ -37,7 +37,7 @@ export default function Navbar() {
       >
         <Link
           href="/"
-          className="text-lg font-semibold tracking-tight text-foreground"
+          className="text-2xl font-semibold tracking-tight text-foreground"
         >
           Leftiees
         </Link>
