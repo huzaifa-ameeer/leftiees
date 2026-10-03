@@ -49,7 +49,12 @@ export async function POST(request: Request) {
             reject(error ?? new Error("Upload failed"));
             return;
           }
-          resolve(result.secure_url);
+          resolve(
+            result.secure_url.replace(
+              "/image/upload/",
+              "/image/upload/f_auto,q_auto,w_1600,c_limit/",
+            ),
+          );
         },
       );
       stream.end(buffer);
