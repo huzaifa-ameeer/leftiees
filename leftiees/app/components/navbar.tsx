@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -12,6 +13,8 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
   const [open, setOpen] = useState(false);
   const [activePath, setActivePath] = useState(pathname);
 
@@ -28,6 +31,13 @@ export default function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
+
+  async function handleSignOut() {
+    await authClient.signOut();
+    setOpen(false);
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-black/10 bg-background/80 backdrop-blur-md">
@@ -65,18 +75,33 @@ export default function Navbar() {
           </ul>
 
           <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="rounded-full px-4 py-2 text-sm text-zinc-600 transition-colors hover:text-foreground"
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
-            >
-              Sign up
-            </Link>
+            {isPending ? (
+              <span
+                aria-hidden="true"
+                className="h-10 w-10 animate-pulse rounded-full bg-black/10"
+              />
+            ) : session ? (
+              <UserMenu
+                name={session.user.name}
+                email={session.user.email}
+                onSignOut={handleSignOut}
+              />
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-full px-4 py-2 text-sm text-zinc-600 transition-colors hover:text-foreground"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -138,23 +163,116 @@ export default function Navbar() {
           </ul>
 
           <div className="mx-4 mb-4 flex flex-col gap-2 border-t border-black/10 pt-4 sm:mx-6">
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="rounded-full px-4 py-3 text-center text-base text-zinc-600 transition-colors hover:text-foreground"
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              onClick={() => setOpen(false)}
-              className="rounded-full bg-foreground px-4 py-3 text-center text-base font-medium text-background transition-colors hover:bg-foreground/85"
-            >
-              Sign up
-            </Link>
+            {session ? (
+              <>
+                <div className="px-4 pb-1">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {session.user.name}
+                  </p>
+                  <p className="truncate text-sm text-zinc-500">
+                    {session.user.email}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="rounded-full px-4 py-3 text-center text-base text-zinc-600 transition-colors hover:text-foreground"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="rounded-full px-4 py-3 text-center text-base text-zinc-600 transition-colors hover:text-foreground"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className="rounded-full bg-foreground px-4 py-3 text-center text-base font-medium text-background transition-colors hover:bg-foreground/85"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
     </header>
+  );
+}
+
+function UserMenu({
+  name,
+  email,
+  onSignOut,
+}: {
+  name: string;
+  email: string;
+  onSignOut: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const initials = name.trim().charAt(0).toUpperCase() || "U";
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Account menu"
+        title={name}
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-denim text-sm font-medium text-background transition-colors hover:bg-denim/90"
+      >
+        {initials}
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-2xl border border-black/10 bg-background shadow-lg"
+        >
+          <div className="border-b border-black/10 px-4 py-3">
+            <p className="truncate text-sm font-medium text-foreground">
+              {name}
+            </p>
+            <p className="truncate text-xs text-zinc-500">{email}</p>
+          </div>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={onSignOut}
+            className="w-full px-4 py-3 text-left text-sm text-zinc-700 transition-colors hover:bg-black/5"
+          >
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
