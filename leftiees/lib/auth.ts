@@ -26,9 +26,18 @@ const db = client.db("leftiees");
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, { client }),
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "user",
+        input: false,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
   },
   plugins: [
     emailOTP({

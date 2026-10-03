@@ -1,6 +1,9 @@
 import AuthForm from "../components/auth-form";
 
-export default function Signup() {
+export default async function Signup({ searchParams }: PageProps<"/signup">) {
+  const { redirect } = await searchParams;
+  const redirectTo = typeof redirect === "string" ? redirect : undefined;
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-8 px-4 py-15 text-center sm:px-6 lg:px-8">
       <div className="flex flex-col items-center gap-3">
@@ -14,7 +17,7 @@ export default function Signup() {
           Sign up to get started with Leftiees.
         </p>
       </div>
-      <AuthForm mode="signup" />
+      <AuthForm mode="signup" redirectTo={redirectTo} />
     </main>
   );
 }

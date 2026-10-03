@@ -3,9 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { authClient } from "@/lib/auth-client";
 
-export default function VerifyOtpForm({ email }: { email: string }) {
+export default function VerifyOtpForm({
+  email,
+  redirectTo,
+}: {
+  email: string;
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +39,11 @@ export default function VerifyOtpForm({ email }: { email: string }) {
       return;
     }
 
-    router.push("/login");
+    router.push(
+      redirectTo
+        ? `/login?redirect=${encodeURIComponent(redirectTo)}`
+        : "/login",
+    );
     router.refresh();
   }
 
@@ -121,7 +132,14 @@ export default function VerifyOtpForm({ email }: { email: string }) {
 
       <p className="text-sm text-zinc-600">
         Already verified?{" "}
-        <Link href="/login" className="font-medium text-denim hover:underline">
+        <Link
+          href={
+            redirectTo
+              ? `/login?redirect=${encodeURIComponent(redirectTo)}`
+              : "/login"
+          }
+          className="font-medium text-denim hover:underline"
+        >
           Log in
         </Link>
       </p>

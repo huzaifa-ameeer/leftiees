@@ -3,8 +3,9 @@ import VerifyOtpForm from "../components/verify-otp-form";
 export default async function VerifyEmailPage({
   searchParams,
 }: PageProps<"/verify-email">) {
-  const { email } = await searchParams;
+  const { email, redirect } = await searchParams;
   const address = typeof email === "string" ? email : "";
+  const redirectTo = typeof redirect === "string" ? redirect : undefined;
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-8 px-4 py-24 text-center sm:px-6 lg:px-8">
@@ -27,7 +28,7 @@ export default async function VerifyEmailPage({
           )}
         </p>
       </div>
-      <VerifyOtpForm email={address} />
+      <VerifyOtpForm email={address} redirectTo={redirectTo} />
     </main>
   );
 }

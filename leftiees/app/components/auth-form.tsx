@@ -3,11 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { authClient } from "@/lib/auth-client";
+
+import TextField from "./text-field";
 
 type Mode = "login" | "signup";
 
-export default function AuthForm({ mode }: { mode: Mode }) {
+export default function AuthForm({
+  mode,
+  redirectTo,
+}: {
+  mode: Mode;
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const isSignup = mode === "signup";
   const [name, setName] = useState("");
@@ -22,6 +31,19 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     setLoading(true);
 
     if (isSignup) {
+      const checkResponse = await fetch("/api/auth/email-exists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const check = await checkResponse.json().catch(() => null);
+
+      if (check?.exists) {
+        setError("An account with this email already exists.");
+        setLoading(false);
+        return;
+      }
+
       const { error: signUpError } = await authClient.signUp.email({
         name,
         email,
@@ -34,7 +56,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         return;
       }
 
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      router.push(redirectTo || "/");
       router.refresh();
       return;
     }
@@ -45,49 +67,46 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     });
 
     if (signInError) {
-      if (signInError.code === "EMAIL_NOT_VERIFIED") {
-        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
-        router.refresh();
-        return;
-      }
-
       setError(signInError.message ?? "Something went wrong. Please try again.");
       setLoading(false);
       return;
     }
 
-    router.push("/");
+    router.push(redirectTo || "/");
     router.refresh();
   }
 
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-3">
       {isSignup && (
-        <Input
+        <TextField
           id="name"
           label="Name"
           type="text"
           autoComplete="name"
+          required
           value={name}
           onChange={(event) => setName(event.target.value)}
         />
       )}
 
-      <Input
+      <TextField
         id="email"
         label="Email"
         type="email"
         autoComplete="email"
+        required
         value={email}
         onChange={(event) => setEmail(event.target.value)}
       />
 
-      <Input
+      <TextField
         id="password"
         label="Password"
         type="password"
         autoComplete={isSignup ? "new-password" : "current-password"}
         minLength={8}
+        required
         value={password}
         onChange={(event) => setPassword(event.target.value)}
       />
@@ -109,33 +128,18 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       <p className="text-sm text-zinc-600">
         {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
         <Link
-          href={isSignup ? "/login" : "/signup"}
+          href={
+            redirectTo
+              ? `${isSignup ? "/login" : "/signup"}?redirect=${encodeURIComponent(redirectTo)}`
+              : isSignup
+                ? "/login"
+                : "/signup"
+          }
           className="font-medium text-denim hover:underline"
         >
           {isSignup ? "Log in" : "Sign up"}
         </Link>
       </p>
     </form>
-  );
-}
-
-function Input({
-  id,
-  label,
-  ...props
-}: { id: string; label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <>
-      <label htmlFor={id} className="sr-only">
-        {label}
-      </label>
-      <input
-        id={id}
-        placeholder={label}
-        required
-        className="h-12 w-full rounded-xl border border-black/15 bg-background px-4 text-left text-base text-foreground transition-colors placeholder:text-zinc-400 focus:border-denim"
-        {...props}
-      />
-    </>
   );
 }
