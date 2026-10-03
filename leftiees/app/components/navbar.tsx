@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useCart } from "@/lib/cart";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -15,6 +16,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
+  const { totalQuantity, clear } = useCart();
   const [open, setOpen] = useState(false);
   const [activePath, setActivePath] = useState(pathname);
 
@@ -34,6 +36,7 @@ export default function Navbar() {
 
   async function handleSignOut() {
     await authClient.signOut();
+    clear();
     setOpen(false);
     router.push("/");
     router.refresh();
@@ -73,64 +76,75 @@ export default function Navbar() {
               );
             })}
           </ul>
-
-          <div className="flex items-center gap-2">
-            {isPending ? (
-              <span
-                aria-hidden="true"
-                className="h-10 w-10 animate-pulse rounded-full bg-black/10"
-              />
-            ) : session ? (
-              <UserMenu
-                name={session.user.name}
-                email={session.user.email}
-                onSignOut={handleSignOut}
-              />
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="rounded-full px-4 py-2 text-sm text-zinc-600 transition-colors hover:text-foreground"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
-                >
-                  Sign up
-                </Link>
-              </>
-            )}
-          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          aria-label={open ? "Close menu" : "Open menu"}
-          className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:bg-black/5 md:hidden"
-        >
-          <span aria-hidden="true" className="relative block h-4 w-5">
+        <div className="flex items-center gap-1">
+          <Link
+            href="/cart"
+            aria-label={`Cart${totalQuantity > 0 ? `, ${totalQuantity} items` : ""}`}
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-black/5"
+          >
+            <CartIcon />
+            {totalQuantity > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-denim px-1 text-xs font-medium text-background">
+                {totalQuantity}
+              </span>
+            )}
+          </Link>
+          {isPending ? (
             <span
-              className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
-                open ? "translate-y-[7px] rotate-45" : ""
-              }`}
+              aria-hidden="true"
+              className="hidden h-10 w-10 animate-pulse rounded-full bg-black/10 md:block"
             />
-            <span
-              className={`absolute left-0 top-[7px] h-0.5 w-5 rounded-full bg-current transition-opacity duration-200 motion-reduce:transition-none ${
-                open ? "opacity-0" : "opacity-100"
-              }`}
+          ) : session ? (
+            <UserMenu
+              name={session.user.name}
+              email={session.user.email}
+              onSignOut={handleSignOut}
             />
-            <span
-              className={`absolute left-0 top-[14px] h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
-                open ? "-translate-y-[7px] -rotate-45" : ""
-              }`}
-            />
-          </span>
-        </button>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden rounded-full px-4 py-2 text-sm text-zinc-600 transition-colors hover:text-foreground md:inline-flex"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="hidden rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/85 md:inline-flex"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            aria-label={open ? "Close menu" : "Open menu"}
+            className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:bg-black/5 md:hidden"
+          >
+            <span aria-hidden="true" className="relative block h-4 w-5">
+              <span
+                className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                  open ? "translate-y-[7px] rotate-45" : ""
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-[7px] h-0.5 w-5 rounded-full bg-current transition-opacity duration-200 motion-reduce:transition-none ${
+                  open ? "opacity-0" : "opacity-100"
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-[14px] h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                  open ? "-translate-y-[7px] -rotate-45" : ""
+                }`}
+              />
+            </span>
+          </button>
+        </div>
       </nav>
 
       <div
@@ -162,47 +176,46 @@ export default function Navbar() {
             })}
           </ul>
 
-          <div className="mx-4 mb-4 flex flex-col gap-2 border-t border-black/10 pt-4 sm:mx-6">
-            {session ? (
-              <>
-                <div className="px-4 pb-1">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {session.user.name}
-                  </p>
-                  <p className="truncate text-sm text-zinc-500">
-                    {session.user.email}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="rounded-full px-4 py-3 text-center text-base text-zinc-600 transition-colors hover:text-foreground"
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className="rounded-full px-4 py-3 text-center text-base text-zinc-600 transition-colors hover:text-foreground"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  onClick={() => setOpen(false)}
-                  className="rounded-full bg-foreground px-4 py-3 text-center text-base font-medium text-background transition-colors hover:bg-foreground/85"
-                >
-                  Sign up
-                </Link>
-              </>
-            )}
-          </div>
+          {!isPending && !session && (
+            <div className="mx-4 mb-4 flex flex-col gap-2 border-t border-black/10 pt-4 sm:mx-6">
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="rounded-full px-4 py-3 text-center text-base text-zinc-600 transition-colors hover:text-foreground"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                onClick={() => setOpen(false)}
+                className="rounded-full bg-foreground px-4 py-3 text-center text-base font-medium text-background transition-colors hover:bg-foreground/85"
+              >
+                Sign up
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="h-5 w-5"
+    >
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+      <path d="M3 6h18" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
   );
 }
 
