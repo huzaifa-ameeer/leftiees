@@ -22,10 +22,17 @@ if (process.env.NODE_ENV !== "production") {
   globalForMongo.mongoClient = client;
 }
 
-const db = client.db("leftiees");
+const db = client.db(process.env.MONGO_DB_NAME ?? "leftiees");
+
+const trustedOrigins = [
+  process.env.BETTER_AUTH_URL,
+  ...(process.env.TRUSTED_ORIGINS?.split(",").map((origin) => origin.trim()) ??
+    []),
+].filter((origin): origin is string => Boolean(origin));
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, { client }),
+  trustedOrigins,
   user: {
     additionalFields: {
       role: {
