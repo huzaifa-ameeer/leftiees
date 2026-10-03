@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+import ConfirmDialog from "@/app/components/confirm-dialog";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
@@ -14,13 +15,20 @@ export default function ProductManager({ products }: { products: Product[] }) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
-  async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  async function confirmDelete() {
+    if (!pendingDelete) return;
 
-    setDeletingId(id);
-    const response = await fetch(`/api/products/${id}`, { method: "DELETE" });
+    setDeletingId(pendingDelete.id);
+    const response = await fetch(`/api/products/${pendingDelete.id}`, {
+      method: "DELETE",
+    });
     setDeletingId(null);
+    setPendingDelete(null);
 
     if (!response.ok) {
       toast.error("Could not delete the product");
@@ -84,7 +92,9 @@ export default function ProductManager({ products }: { products: Product[] }) {
               </button>
               <button
                 type="button"
-                onClick={() => handleDelete(product.id, product.name)}
+                onClick={() =>
+                  setPendingDelete({ id: product.id, name: product.name })
+                }
                 disabled={deletingId === product.id}
                 className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
               >
@@ -104,6 +114,19 @@ export default function ProductManager({ products }: { products: Product[] }) {
           )}
         </div>
       ))}
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete product?"
+        message={
+          pendingDelete
+            ? `"${pendingDelete.name}" will be permanently removed.`
+            : undefined
+        }
+        confirmLabel="Delete product"
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

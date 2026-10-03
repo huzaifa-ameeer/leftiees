@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 
+import ConfirmDialog from "@/app/components/confirm-dialog";
+
 export default function ImageUploader({
   value,
   onChange,
@@ -12,8 +14,8 @@ export default function ImageUploader({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [urlInput, setUrlInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [pendingRemoval, setPendingRemoval] = useState<number | null>(null);
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -22,6 +24,8 @@ export default function ImageUploader({
 
     const uploaded: string[] = [];
     for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch("/api/upload", {
@@ -29,6 +33,7 @@ export default function ImageUploader({
         body: formData,
       });
       const data = await response.json().catch(() => null);
+
       if (!response.ok) {
         setError(data?.error ?? "Upload failed");
         continue;
@@ -36,16 +41,17 @@ export default function ImageUploader({
       uploaded.push(data.url);
     }
 
-    onChange([...value, ...uploaded]);
+    if (uploaded.length > 0) {
+      onChange([...value, ...uploaded]);
+    }
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function addUrl() {
-    const url = urlInput.trim();
-    if (!url) return;
-    onChange([...value, url]);
-    setUrlInput("");
+  function confirmRemoval() {
+    if (pendingRemoval === null) return;
+    onChange(value.filter((_, index) => index !== pendingRemoval));
+    setPendingRemoval(null);
   }
 
   return (
@@ -59,9 +65,9 @@ export default function ImageUploader({
             <Image src={url} alt="" fill sizes="80px" className="object-cover" />
             <button
               type="button"
-              onClick={() => onChange(value.filter((_, i) => i !== index))}
-              aria-label="Remove image"
-              className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-sm text-red-600 shadow-sm"
+              onClick={() => setPendingRemoval(index)}
+              aria-label="Delete image"
+              className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-sm text-red-600 shadow-sm transition-colors hover:bg-white"
             >
               ×
             </button>
@@ -83,24 +89,20 @@ export default function ImageUploader({
         </label>
       </div>
 
-      <div className="flex gap-2">
-        <input
-          type="url"
-          value={urlInput}
-          onChange={(event) => setUrlInput(event.target.value)}
-          placeholder="…or paste an image URL"
-          className="h-11 flex-1 rounded-xl border border-black/15 bg-background px-3.5 text-sm text-foreground transition-colors placeholder:text-zinc-400 focus:border-denim"
-        />
-        <button
-          type="button"
-          onClick={addUrl}
-          className="h-11 shrink-0 rounded-full border border-black/15 px-4 text-sm font-medium transition-colors hover:bg-black/5"
-        >
-          Add
-        </button>
-      </div>
+      <p className="text-xs text-zinc-500">
+        Upload images from your device.
+      </p>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <ConfirmDialog
+        open={pendingRemoval !== null}
+        title="Delete this image?"
+        message="This image will be removed from the product. This can't be undone."
+        confirmLabel="Delete image"
+        onConfirm={confirmRemoval}
+        onCancel={() => setPendingRemoval(null)}
+      />
     </div>
   );
 }
