@@ -28,6 +28,7 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
   if (!cached.promise) {
     cached.promise = mongoose.connect(mongoUri, {
       bufferCommands: false,
+      dbName: process.env.MONGO_DB_NAME ?? "leftiees",
     });
   }
 
