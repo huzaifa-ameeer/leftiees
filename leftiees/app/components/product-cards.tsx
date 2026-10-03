@@ -28,7 +28,7 @@ const PRODUCTS = [
 export default function ProductCards({ className }: { className?: string }) {
   return (
     <section
-      className={`w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8 ${className ?? ""}`}
+      className={`w-full max-w-6xl px-4 pb-16 sm:px-6 lg:px-8 ${className ?? ""}`}
     >
       <h2 className="mb-6 text-2xl font-semibold tracking-tight sm:text-3xl">
         Fresh drops
