@@ -43,7 +43,7 @@ export default function Hero() {
     setIndex((next + SLIDES.length) % SLIDES.length);
 
   return (
-    <section className="grid w-full max-w-6xl items-center gap-5 px-4 pb-2 pt-8 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
+    <section className="grid w-full max-w-6xl items-center gap-5 px-4 pt-8 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
       <div className="flex flex-col items-start gap-6 lg:self-start">
         <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-denim">
           <span className="h-1.5 w-1.5 rounded-full bg-denim" />
