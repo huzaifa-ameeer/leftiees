@@ -41,13 +41,13 @@ export default function Hero() {
     setIndex((next + SLIDES.length) % SLIDES.length);
 
   return (
-    <section className="grid w-full max-w-6xl items-center gap-5 px-4 pt-8 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
+    <section className="grid w-full max-w-6xl items-center gap-5 px-4 pt-6 sm:px-6 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-2 lg:content-center lg:gap-16 lg:px-8">
       <div className="flex flex-col items-start gap-6 lg:self-start">
         <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-denim">
           <span className="h-1.5 w-1.5 rounded-full bg-denim" />
           Leftover drop
         </p>
-        <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-5xl lg:text-7xl">
+        <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-5xl lg:text-6xl">
           Only the leftovers worth taking.{" "}
           <span className="text-denim">Denim pants</span>, jackets, and more.
         </h1>
@@ -66,7 +66,7 @@ export default function Hero() {
 
       <div className="flex w-full flex-col gap-5 lg:max-w-[460px] lg:justify-self-end">
         <div
-          className="relative aspect-[4/5] max-h-[70vh] w-full overflow-hidden rounded-3xl bg-zinc-100"
+          className="relative aspect-[4/5] max-h-[70vh] w-full overflow-hidden rounded-3xl bg-zinc-100 lg:max-h-[calc(100dvh-16rem)]"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           onFocusCapture={() => setPaused(true)}
