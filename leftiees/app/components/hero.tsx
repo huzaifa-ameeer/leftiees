@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import BrandMarquee from "./brand-marquee";
+
 const SLIDES = [
   {
     src: "https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=900&h=1200&fit=crop",
@@ -148,6 +150,8 @@ export default function Hero() {
           </button>
         </div>
       </div>
+
+      <BrandMarquee className="lg:col-span-2" />
     </section>
   );
 }

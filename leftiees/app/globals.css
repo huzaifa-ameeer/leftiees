@@ -9,6 +9,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-denim: #22405f;
+  --animate-marquee: marquee 28s linear infinite;
   --font-sans: var(--font-space-grotesk);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
@@ -28,4 +29,34 @@ body {
     outline: 2px solid var(--foreground);
     outline-offset: 2px;
   }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marquee-edge {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    rgba(0, 0, 0, 0.35) 5%,
+    #000 16%,
+    #000 84%,
+    rgba(0, 0, 0, 0.35) 95%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    rgba(0, 0, 0, 0.35) 5%,
+    #000 16%,
+    #000 84%,
+    rgba(0, 0, 0, 0.35) 95%,
+    transparent 100%
+  );
 }
