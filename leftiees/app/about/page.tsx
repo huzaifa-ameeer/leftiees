@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "About — Leftiees",
   description:
     "Leftiees is a small denim label built around one-off leftover pieces, limited runs, and no restocks.",
 };
