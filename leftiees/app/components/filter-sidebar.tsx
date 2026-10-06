@@ -8,6 +8,7 @@ export type Filters = {
   minPrice: number;
   maxPrice: number;
   brands: string[];
+  waists: number[];
   sort: SortOption;
 };
 
@@ -23,11 +24,13 @@ function clamp(value: number, min: number, max: number) {
 
 export default function FilterSidebar({
   brands,
+  waistOptions,
   bounds,
   filters,
   onChange,
 }: {
   brands: string[];
+  waistOptions: number[];
   bounds: { min: number; max: number };
   filters: Filters;
   onChange: (filters: Filters) => void;
@@ -39,6 +42,13 @@ export default function FilterSidebar({
       ? filters.brands.filter((value) => value !== brand)
       : [...filters.brands, brand];
     onChange({ ...filters, brands: next });
+  }
+
+  function toggleWaist(waist: number) {
+    const next = filters.waists.includes(waist)
+      ? filters.waists.filter((value) => value !== waist)
+      : [...filters.waists, waist];
+    onChange({ ...filters, waists: next });
   }
 
   return (
@@ -134,6 +144,32 @@ export default function FilterSidebar({
           </div>
         </fieldset>
 
+        {waistOptions.length > 0 && (
+          <fieldset className="flex flex-col gap-3">
+            <legend className="mb-1 text-sm font-semibold">Waist</legend>
+            <div className="flex flex-wrap gap-2">
+              {waistOptions.map((waist) => (
+                <label
+                  key={waist}
+                  className={`flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border px-3 text-sm transition-colors ${
+                    filters.waists.includes(waist)
+                      ? "border-denim bg-denim/10 text-foreground"
+                      : "border-black/15 text-zinc-600 hover:border-black/30"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.waists.includes(waist)}
+                    onChange={() => toggleWaist(waist)}
+                    className="sr-only"
+                  />
+                  {waist}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
         <fieldset className="flex flex-col gap-3">
           <legend className="mb-1 text-sm font-semibold">Sort by</legend>
           <div className="flex flex-col gap-2.5">
@@ -162,6 +198,7 @@ export default function FilterSidebar({
               minPrice: bounds.min,
               maxPrice: bounds.max,
               brands: [],
+              waists: [],
               sort: "featured",
             })
           }
