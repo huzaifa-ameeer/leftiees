@@ -1,11 +1,14 @@
 import mongoose, { Schema, type Model } from "mongoose";
 
+import { WAIST_MAX, WAIST_MIN, isValidWaist } from "@/lib/waist";
+
 export type ProductFields = {
   name: string;
   brand: string;
   description: string;
   price: number;
   oldPrice?: number;
+  waist: number;
   stock: number;
   images: string[];
   featured: boolean;
@@ -20,6 +23,16 @@ const productSchema = new Schema<ProductFields>(
     description: { type: String, default: "" },
     price: { type: Number, required: true, min: 0 },
     oldPrice: { type: Number, min: 0 },
+    waist: {
+      type: Number,
+      required: true,
+      min: WAIST_MIN,
+      max: WAIST_MAX,
+      validate: {
+        validator: isValidWaist,
+        message: `Waist must be an even number between ${WAIST_MIN} and ${WAIST_MAX} inches.`,
+      },
+    },
     stock: { type: Number, default: 0, min: 0 },
     images: { type: [String], default: [] },
     featured: { type: Boolean, default: false },
