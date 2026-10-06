@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 
 import TextField from "@/app/components/text-field";
 import type { Product } from "@/lib/types";
+import { WAIST_OPTIONS } from "@/lib/waist";
 
 import ImageUploader from "./image-uploader";
 
@@ -28,6 +29,7 @@ export default function ProductForm({
   const [brand, setBrand] = useState(initial?.brand ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [price, setPrice] = useState(initial ? String(initial.price) : "");
+  const [waist, setWaist] = useState(initial?.waist ? String(initial.waist) : "");
   const [oldPrice, setOldPrice] = useState(
     initial?.oldPrice ? String(initial.oldPrice) : "",
   );
@@ -53,6 +55,11 @@ export default function ProductForm({
       return;
     }
 
+    if (!waist) {
+      setError("Waist is required.");
+      return;
+    }
+
     setSaving(true);
 
     const payload = {
@@ -60,6 +67,7 @@ export default function ProductForm({
       brand: brand.trim(),
       description: description.trim(),
       price: priceValue,
+      waist: Number(waist),
       oldPrice: oldPrice ? Number(oldPrice) : undefined,
       stock: Number(stock) || 0,
       images,
@@ -92,6 +100,7 @@ export default function ProductForm({
       setBrand("");
       setDescription("");
       setPrice("");
+      setWaist("");
       setOldPrice("");
       setStock("0");
       return;
@@ -126,6 +135,27 @@ export default function ProductForm({
           value={brand}
           onChange={(event) => setBrand(event.target.value)}
         />
+        <div className="flex flex-col">
+          <label htmlFor={`waist-${variant}`} className="sr-only">
+            Waist (inches)
+          </label>
+          <select
+            id={`waist-${variant}`}
+            required
+            value={waist}
+            onChange={(event) => setWaist(event.target.value)}
+            className="h-12 w-full rounded-xl border border-black/15 bg-background px-4 text-left text-base text-foreground transition-colors focus:border-denim"
+          >
+            <option value="" disabled>
+              Waist (inches)
+            </option>
+            {WAIST_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
         <TextField
           id={`price-${variant}`}
           label="Price (Rs)"
