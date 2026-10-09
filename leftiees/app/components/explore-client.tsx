@@ -16,11 +16,7 @@ export default function ExploreClient({ products }: { products: Product[] }) {
   const waistOptions = useMemo(
     () =>
       Array.from(
-        new Set(
-          products
-            .map((product) => product.waist)
-            .filter((waist): waist is number => typeof waist === "number"),
-        ),
+        new Set(products.flatMap((product) => product.waists ?? [])),
       ).sort((a, b) => a - b),
     [products],
   );
@@ -46,8 +42,9 @@ export default function ExploreClient({ products }: { products: Product[] }) {
         (filters.brands.length === 0 ||
           filters.brands.includes(product.brand)) &&
         (filters.waists.length === 0 ||
-          (product.waist !== undefined &&
-            filters.waists.includes(product.waist))),
+          (product.waists ?? []).some((waist) =>
+            filters.waists.includes(waist),
+          )),
     );
 
     if (filters.sort === "price-asc") {
