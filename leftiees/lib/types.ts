@@ -5,7 +5,7 @@ export type Product = {
   description: string;
   price: number;
   oldPrice?: number;
-  waist?: number;
+  waists?: number[];
   stock: number;
   images: string[];
   alt: string;

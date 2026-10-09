@@ -15,3 +15,16 @@ export function isValidWaist(value: unknown): value is number {
     value % 2 === 0
   );
 }
+
+export function isValidWaists(value: unknown): value is number[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((item) => isValidWaist(item))
+  );
+}
+
+export function normalizeWaists(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return Array.from(new Set(value.filter(isValidWaist))).sort((a, b) => a - b);
+}

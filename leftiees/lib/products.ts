@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { ProductModel, type ProductFields } from "@/lib/models/product";
 import { connectToDatabase } from "@/lib/mongoose";
 import type { Product } from "@/lib/types";
+import { normalizeWaists } from "@/lib/waist";
 
 export type ProductInput = {
   name?: string;
@@ -10,7 +11,7 @@ export type ProductInput = {
   description?: string;
   price?: number;
   oldPrice?: number;
-  waist?: number;
+  waists?: number[];
   stock?: number;
   images?: string[];
   featured?: boolean;
@@ -23,7 +24,7 @@ function toProduct(doc: {
   description?: string;
   price: number;
   oldPrice?: number;
-  waist?: number;
+  waists?: number[];
   stock?: number;
   images?: string[];
   featured?: boolean;
@@ -35,7 +36,7 @@ function toProduct(doc: {
     description: doc.description ?? "",
     price: doc.price,
     oldPrice: doc.oldPrice ?? undefined,
-    waist: doc.waist ?? undefined,
+    waists: doc.waists?.length ? doc.waists : undefined,
     stock: doc.stock ?? 0,
     images: doc.images ?? [],
     alt: doc.name,
@@ -50,7 +51,7 @@ function sanitize(input: ProductInput): Partial<ProductFields> {
   if (typeof input.brand === "string") data.brand = input.brand.trim();
   if (typeof input.description === "string") data.description = input.description.trim();
   if (typeof input.price === "number" && !Number.isNaN(input.price)) data.price = input.price;
-  if (typeof input.waist === "number" && !Number.isNaN(input.waist)) data.waist = input.waist;
+  if (Array.isArray(input.waists)) data.waists = normalizeWaists(input.waists);
   if (typeof input.stock === "number" && !Number.isNaN(input.stock)) data.stock = input.stock;
   if (Array.isArray(input.images)) data.images = input.images.filter(Boolean);
   if (typeof input.featured === "boolean") data.featured = input.featured;
