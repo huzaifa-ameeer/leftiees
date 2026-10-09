@@ -125,6 +125,24 @@ export default function ProductDetail({ product }: { product: Product }) {
             {product.description}
           </p>
 
+          {product.waists && product.waists.length > 0 && (
+            <div className="flex flex-col gap-2.5">
+              <p className="text-sm font-semibold">
+                Available waist (inches)
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {product.waists.map((waist) => (
+                  <span
+                    key={waist}
+                    className="flex h-11 min-w-11 items-center justify-center rounded-lg border border-black/15 px-3.5 text-sm text-zinc-700"
+                  >
+                    {waist}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-2 sm:flex-row">
             <button
               type="button"

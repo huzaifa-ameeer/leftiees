@@ -57,6 +57,11 @@ export default function ProductCard({ product }: { product: Product }) {
               </span>
             )}
           </p>
+          {product.waists && product.waists.length > 0 && (
+            <p className="pt-0.5 text-xs text-zinc-500">
+              Waist {product.waists.join(" · ")}
+            </p>
+          )}
         </div>
       </Link>
 
