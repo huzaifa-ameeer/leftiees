@@ -6,7 +6,7 @@ import {
   getProductById,
   updateProduct,
 } from "@/lib/products";
-import { WAIST_MAX, WAIST_MIN, isValidWaist } from "@/lib/waist";
+import { WAIST_MAX, WAIST_MIN, isValidWaists } from "@/lib/waist";
 
 export async function GET(
   _request: Request,
@@ -32,10 +32,10 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
-  if (body?.waist !== undefined && !isValidWaist(body.waist)) {
+  if (body?.waists !== undefined && !isValidWaists(body.waists)) {
     return NextResponse.json(
       {
-        error: `Waist must be an even number between ${WAIST_MIN} and ${WAIST_MAX} inches`,
+        error: `Waist must be one or more even numbers between ${WAIST_MIN} and ${WAIST_MAX} inches`,
       },
       { status: 400 },
     );
