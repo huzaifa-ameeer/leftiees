@@ -29,7 +29,7 @@ export default function ProductForm({
   const [brand, setBrand] = useState(initial?.brand ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [price, setPrice] = useState(initial ? String(initial.price) : "");
-  const [waist, setWaist] = useState(initial?.waist ? String(initial.waist) : "");
+  const [waists, setWaists] = useState<number[]>(initial?.waists ?? []);
   const [oldPrice, setOldPrice] = useState(
     initial?.oldPrice ? String(initial.oldPrice) : "",
   );
@@ -39,6 +39,14 @@ export default function ProductForm({
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function toggleWaist(option: number) {
+    setWaists((current) =>
+      current.includes(option)
+        ? current.filter((value) => value !== option)
+        : [...current, option].sort((a, b) => a - b),
+    );
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,8 +63,8 @@ export default function ProductForm({
       return;
     }
 
-    if (!waist) {
-      setError("Waist is required.");
+    if (waists.length === 0) {
+      setError("Select at least one waist size.");
       return;
     }
 
@@ -67,7 +75,7 @@ export default function ProductForm({
       brand: brand.trim(),
       description: description.trim(),
       price: priceValue,
-      waist: Number(waist),
+      waists,
       oldPrice: oldPrice ? Number(oldPrice) : undefined,
       stock: Number(stock) || 0,
       images,
@@ -100,7 +108,7 @@ export default function ProductForm({
       setBrand("");
       setDescription("");
       setPrice("");
-      setWaist("");
+      setWaists([]);
       setOldPrice("");
       setStock("0");
       return;
@@ -135,26 +143,35 @@ export default function ProductForm({
           value={brand}
           onChange={(event) => setBrand(event.target.value)}
         />
-        <div className="flex flex-col">
-          <label htmlFor={`waist-${variant}`} className="sr-only">
+        <div className="flex flex-col gap-2 sm:col-span-2">
+          <span className="text-sm font-medium text-zinc-700">
             Waist (inches)
-          </label>
-          <select
-            id={`waist-${variant}`}
-            required
-            value={waist}
-            onChange={(event) => setWaist(event.target.value)}
-            className="h-12 w-full rounded-xl border border-black/15 bg-background px-4 text-left text-base text-foreground transition-colors focus:border-denim"
-          >
-            <option value="" disabled>
-              Waist (inches)
-            </option>
-            {WAIST_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {WAIST_OPTIONS.map((option) => {
+              const selected = waists.includes(option);
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => toggleWaist(option)}
+                  className={`flex h-11 min-w-11 items-center justify-center rounded-lg border px-3 text-sm transition-colors ${
+                    selected
+                      ? "border-denim bg-denim/10 text-foreground"
+                      : "border-black/15 text-zinc-600 hover:border-black/30"
+                  }`}
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+          {waists.length === 0 && (
+            <p className="text-xs text-zinc-500">
+              Select every waist size this pant is available in.
+            </p>
+          )}
         </div>
         <TextField
           id={`price-${variant}`}
