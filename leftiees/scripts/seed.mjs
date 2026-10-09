@@ -15,7 +15,7 @@ const products = [
   {
     name: "512 Slim Taper Jeans",
     brand: "Levi's",
-    waist: 32,
+    waists: [30, 32, 34, 36],
     description:
       "A modern slim-taper cut with a streamlined leg that narrows below the knee. Cut from mid-weight stretch denim with a clean indigo wash.",
     price: 2100,
@@ -27,7 +27,7 @@ const products = [
   {
     name: "Mid-Rise Skinny Jeans",
     brand: "Guess",
-    waist: 30,
+    waists: [30, 32, 34],
     description:
       "A high-recovery skinny fit that hugs from hip to ankle without losing shape, finished in a deep saturated blue.",
     price: 3200,
@@ -38,7 +38,7 @@ const products = [
   {
     name: "Straight Fit Denim",
     brand: "Mustang",
-    waist: 34,
+    waists: [32, 34, 36, 38],
     description:
       "Everyday straight-leg denim with a comfortable mid-rise and a classic five-pocket build in a soft, broken-in wash.",
     price: 1850,
@@ -50,7 +50,7 @@ const products = [
   {
     name: "Texas Slim Jeans",
     brand: "Wrangler",
-    waist: 36,
+    waists: [34, 36, 38, 40],
     description:
       "A slim silhouette with a touch of stretch for movement, built on durable denim with authentic Western roots.",
     price: 2600,
@@ -61,7 +61,7 @@ const products = [
   {
     name: "Slim Fit Dark Wash",
     brand: "Diesel",
-    waist: 38,
+    waists: [36, 38, 40, 42],
     description:
       "A refined slim fit in a dark resin-coated wash for a sharper look, with structured denim and clean detailing.",
     price: 3600,
@@ -73,7 +73,7 @@ const products = [
   {
     name: "Classic Regular Fit",
     brand: "Lee",
-    waist: 40,
+    waists: [38, 40, 42, 44],
     description:
       "A timeless regular fit that sits comfortably at the waist with a straight leg — rugged, honest denim made to last.",
     price: 1600,
